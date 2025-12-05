@@ -45,12 +45,6 @@ function App() {
             {env}
           </span>
         </p>
-
-        <button className="counter-btn" onClick={handleClick}>
-          Haz clic para incrementarr
-        </button>
-
-        <p>Contador: <span className="counter">{count}</span></p>
       </header>
     </div>
   );
