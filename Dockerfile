@@ -5,11 +5,14 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 ARG VERSION
+
 # Copia package.json primero para caché de layers
 COPY package*.json ./
-RUN npm ci --only=production --no-optional  # Solo prod deps para build
+
+RUN npm ci --only=production --no-optional
 
 COPY . .
+
 RUN npm run build && echo "Version: ${VERSION}" > /app/build/version.txt
 
 # Stage 2: Runtime con NGINX
@@ -23,13 +26,14 @@ COPY --from=build /app/build /usr/share/nginx/html
 RUN echo "ok" > /usr/share/nginx/html/healthz && \
     echo "Version: ${VERSION}" > /usr/share/nginx/html/version.txt
 
-# Config NGINX básica (opcional: para SPAs, redirige rutas a index.html)
-COPY nginx.conf /etc/nginx/conf.d/default.conf  # Si quieres custom; sino, usa el default de alpine
+# Opcional: Config NGINX custom para SPAs (redirige rutas a index.html)
+# Si no lo necesitas, comenta o remueve esta línea
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 LABEL version=${VERSION}
 
-# Healthcheck en nginx (tu original está bien, pero ajustado)
+# Healthcheck en nginx (verifica HTTP real)
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/healthz || exit 1
 
