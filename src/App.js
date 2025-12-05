@@ -34,7 +34,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Dulce Valeria Miguel</h1>
+        <h1>Dulce Valeria Miguel juann</h1>
 
         <p>
           Ambiente activo:{" "}
