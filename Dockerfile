@@ -28,7 +28,7 @@ RUN echo "ok" > /usr/share/nginx/html/healthz && \
 
 # Opcional: Config NGINX custom para SPAs (redirige rutas a index.html)
 # Si no lo necesitas, comenta o remueve esta línea
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 LABEL version=${VERSION}
