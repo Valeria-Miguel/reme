@@ -31,10 +31,10 @@ jobs:
           context: .
           push: true
           build-args: |
-            VERSION=current  # Usa tu ARG en Dockerfile; o ${{ github.sha }} si prefieres
+            VERSION=current
           tags: |
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:current  # Como en tu setup
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest  # Para fallback
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:current
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
