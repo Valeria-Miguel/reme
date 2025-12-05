@@ -1,0 +1,61 @@
+# .github/workflows/deploy-reme.yml  # O deploy.yml si lo reemplazas
+name: Deploy Blue-Green Reme
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      IMAGE_NAME: reme  # Cambiado a "reme"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: |
+            VERSION=current  # Usa tu ARG en Dockerfile; o ${{ github.sha }} si prefieres
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:current  # Como en tu setup
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest  # Para fallback
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to VPS (Reme)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DO_HOST }}  # 143.198.23.14
+          username: ${{ secrets.DO_USER }}  # dulce
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Iniciando deployment para Reme..."
+            
+            # Configurar variables
+            DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
+            IMAGE_NAME="reme"
+            IMAGE_TAG="current"  # O "latest" si cambias
+            FULL_IMAGE="$DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG"
+            
+            echo "Usando imagen: $FULL_IMAGE"
+            
+            # Ejecutar deployment en ~/reme
+            cd ~/reme
+            bash scripts/deploy.sh "$FULL_IMAGE"
